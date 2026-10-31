@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Simon Danisch
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # Building the index: fetch and parse on worker tasks, write from one task (SQLite has
 # one writer). A package already stored under its tree hash is skipped, so an
 # interrupted build resumes where it stopped.

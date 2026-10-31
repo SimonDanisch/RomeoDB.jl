@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Simon Danisch
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # Package sources, from the package server, cached by tree hash. Only what the index
 # reads is kept: `src/` and `ext/` Julia files, the project files (the package's and the
 # tests'), the README and the Documenter pages under `docs/src`.

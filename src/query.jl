@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Simon Danisch
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # Asking the index. Everything an agent needs before writing code that may already
 # exist: definitions and packages by topic, a function's implementers across the
 # ecosystem, who depends on whom, and code similar to a given definition.

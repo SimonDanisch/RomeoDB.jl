@@ -1,0 +1,15 @@
+[ecosystem-graph-2026-10-31]
+git-tree-sha1 = "02ca395863913f823bc6d9e9d641bc79e3892356"
+lazy = true
+
+    [[ecosystem-graph-2026-10-31.download]]
+    sha256 = "c900d168d32f21538963c43e41cfd073f083ff14b62f087ff16f89ab54c52d13"
+    url = "https://github.com/SimonDanisch/RomeoDB.jl/releases/download/index-2026-10-31/ecosystem-graph-2026-10-31.tar.gz"
+
+[registry-base-2026-10-31]
+git-tree-sha1 = "ce03ac410d749814f89f6a1587da562ac6bc6203"
+lazy = true
+
+    [[registry-base-2026-10-31.download]]
+    sha256 = "a6cb4d4aedee789c3b72b1347386c84c218ce0f6426115bde956562c9fc943dd"
+    url = "https://github.com/SimonDanisch/RomeoDB.jl/releases/download/index-2026-10-31/registry-base-2026-10-31.tar.gz"

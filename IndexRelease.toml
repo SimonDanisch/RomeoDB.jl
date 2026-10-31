@@ -1,0 +1,11 @@
+format = 1
+patches = []
+target = "2026-10-31"
+
+[[bases]]
+revision = "2026-10-31"
+artifact = "registry-base-2026-10-31"
+
+[graph]
+revision = "2026-10-31"
+artifact = "ecosystem-graph-2026-10-31"

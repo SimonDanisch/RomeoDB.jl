@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Simon Danisch
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 using RomeoDB
 
 """

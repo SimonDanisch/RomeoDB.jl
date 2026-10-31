@@ -13,12 +13,40 @@ Pkg.add(url = "https://github.com/SimonDanisch/RomeoDB.jl")
 
 The index, source cache and optional model data live outside this source directory.
 
+## License
+
+RomeoDB's own source code is licensed under the
+[GNU Affero General Public License, version 3 or later](LICENSE)
+(`AGPL-3.0-or-later`). Commercial use is permitted subject to its copyleft and
+source-availability requirements, including the requirements for modified versions
+used over a network. Private use remains permitted.
+
+This license does not relicense third-party source code or documentation indexed
+by RomeoDB, or separately licensed model assets. Those retain their respective
+licenses. An application's use of the MCP interface does not by itself establish
+that the application is a covered derivative work.
+
 An index of the Julia ecosystem, made to stop rewriting what already exists: every
 function, macro, type and constant of the latest version of every package in the
 General registry, with docstrings, READMEs and
 Documenter pages, dependencies, download counts, and a canonical form of each
 definition for finding copies and near copies across packages. It reads source only;
 no package code runs.
+
+## Continuous integration
+
+The regular Julia 1.12 job runs the CPU-only package tests. A separate
+`lavapipe-embeddings` job installs the optional pinned embedding runtime and uses
+`Lavapipe_jll` to run Vulkan compute on the CI machine's CPU. It verifies query
+and document embeddings against the saved fp32 reference, normalization and a
+retrieval example through RomeoDB's Qwen extension. It explicitly selects the
+software ICD and checks the device type, so a local hardware GPU cannot mask a
+software-driver failure.
+
+The job caches the model artifacts and runs three short forward passes, including
+the complete-function embedding API. It does not
+download the registry database or graph. Hardware-specific kernel paths and
+performance still need hardware GPU testing.
 
 ## Asking it
 
@@ -60,7 +88,11 @@ RomeoDB.audit(idx, tbl, "dev/MyPackage")
 For distribution, see [version-pinned index releases](docs/index-releases.md).
 The release builder produces a public base artifact and small package-level patch
 artifacts. BonitoAgents provisions the state pinned by the installed RomeoDB version
-at MCP startup, without a separate update service.
+on the first tool call, without a separate update service. All index and graph
+artifacts are lazy: installing/importing RomeoDB and MCP tool discovery download
+no ecosystem data. `RomeoDB.ecosystem_graph_path()` downloads the optional graph;
+`RomeoDB.ecosystem_data(idx)` also resolves graph and cluster ids against an
+installed index. Qwen model artifacts remain lazy and separate from these datasets.
 
 ```julia
 idx = RomeoDB.Index("/path/to/data")          # SQLite file and source cache

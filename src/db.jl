@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Simon Danisch
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # The index on disk: one SQLite file. Hashes are stored as signed 64-bit integers (their
 # bits), the sketch as a 32-byte blob, and `defs_fts` is an FTS5 index over name, its words,
 # signature and docstring with `defs` as its content table.

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Simon Danisch
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 using RomeoDB
 import TOML
 
@@ -23,6 +26,7 @@ function build_index_release(workdir::AbstractString, output::AbstractString;
                              embedder = nothing, model::AbstractString = "none", dimensions::Integer = 0,
                              new_base::Bool = previous === nothing,
                              function_embeddings::Bool = false, function_dimensions::Integer = 256,
+                             graph_source::Union{Nothing,AbstractString} = nothing,
                              versions = RomeoDB.latest_versions(jll = true),
                              stats::Bool = true,
                              previous_plan::AbstractString = joinpath(dirname(@__DIR__), "IndexRelease.toml"),
@@ -88,6 +92,23 @@ function build_index_release(workdir::AbstractString, output::AbstractString;
         archive.bytes < 2^31 || error("$(archive.name) exceeds GitHub's release-asset limit")
     end
     plan["target"] = String(revision)
+    # Graphs have their own lazy artifact, and must refer to this exact snapshot.
+    # Never carry an earlier graph forward after changing the database revision.
+    pop!(plan, "graph", nothing)
+    if graph_source !== nothing
+        idx = RomeoDB.Index(snapshot)
+        try
+            staged = RomeoDB.stage_graph_release!(idx, graph_source, joinpath(output, "graph"); revision)
+            name = "ecosystem-graph-$revision"
+            archive = joinpath(output, "$name.tar.gz")
+            packed = RomeoDB.pack_graph_release!(staged, name, archive, bindings;
+                url = rstrip(url_prefix, '/') * "/$name.tar.gz")
+            push!(archives, (; name, archive, packed...))
+            plan["graph"] = Dict("revision" => String(revision), "artifact" => name)
+        finally
+            RomeoDB.DBInterface.close!(idx.db)
+        end
+    end
     open(io -> TOML.print(io, plan), planfile, "w")
     return (; revision, counts, archives, bindings, plan = planfile, snapshot)
 end

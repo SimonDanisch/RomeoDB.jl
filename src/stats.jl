@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Simon Danisch
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # Popularity, from the package servers' public request logs (one row per package,
 # status and client type, over the past year). It ranks results: between two packages
 # doing the same thing, the one people use is the better answer.

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Simon Danisch
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # Every tool, once, through the server's loop over a one-package index: a fresh server
 # then answers its first queries without compiling them (seconds otherwise).
 PrecompileTools.@setup_workload begin

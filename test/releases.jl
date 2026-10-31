@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Simon Danisch
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 include(joinpath(@__DIR__, "..", "tools", "build_release.jl"))
 
 @testset "version-pinned index artifacts" begin
@@ -166,7 +169,9 @@ include(joinpath(@__DIR__, "..", "tools", "build_release.jl"))
             versions = [RomeoDB.PackageVersion(Base.UUID(201), "BuildPkg", v"1.0.0", Base.SHA1(repeat("f", 40)), "https://example.test/BuildPkg.jl")]
             first = build_index_release(builder.dir, joinpath(root, "week1"); revision = "week1", registry = "registry1",
                 url_prefix = "https://example.test/releases/week1", versions, stats = false,
-                embedder = ToyEmbedder(), model = "toy-v1", dimensions = 8)
+                embedder = ToyEmbedder(), model = "toy-v1", dimensions = 8,
+                previous_plan = joinpath(root, "absent-plan.toml"),
+                previous_bindings = joinpath(root, "absent-artifacts.toml"))
             @test length(first.archives) == 1
             @test occursin("base", only(first.archives).name)
             builder = RomeoDB.Index(builder.dir)

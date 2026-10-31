@@ -1,6 +1,7 @@
 name = "RomeoDB"
 uuid = "b0bc34ab-3faa-4d3f-891a-2fccc1f41d4b"
 version = "0.1.0"
+license = "AGPL-3.0-or-later"
 authors = ["Simon Danisch <sdanisch@gmail.com>"]
 
 [deps]

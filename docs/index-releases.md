@@ -90,6 +90,29 @@ The source cache is not shipped. `definition` downloads a package's exact
 registered tree on demand and caches it under a package lock. Ordinary search,
 body comparison and package discovery use the database alone.
 
+## Optional graph and model
+
+Pass `graph_source` to the weekly builder to ship a precomputed graph and clusters
+for that snapshot. They are a separate lazy artifact: normal searching does not
+download them. `ecosystem_graph_path()` requests the raw graph bundle;
+`ecosystem_data(idx)` resolves its stored source identities against the installed
+database, including ids reassigned by patch application alongside local projects.
+An older revision's graph is never silently reused for a newer index.
+
+All index, graph and Qwen model bindings are lazy. MCP initialization and tool
+discovery download none of them. The first tool call provisions the database;
+the first semantic query starts the optional model loader. Existing package
+sources remain on-demand downloads of their exact registered trees.
+
+For standalone embedding use, call `RomeoDB.install_embedding_runtime!()` in the
+project that will run RomeoDB, then start a fresh Julia process with
+`RomeoDB.serve(dir; provision=true, embedder=RomeoDB.loadqwen3embedding)`.
+The software sources are pinned in `EmbeddingRuntime.toml`; their installation
+does not fetch the model weights. BonitoAgents performs this software provisioning
+automatically before launching its MCP process. Set `romeodb_embeddings=false`
+in the worker configuration for CPU-only operation. Headless workers use
+`JULIA_GLFW_PLATFORM=null`.
+
 No weekly schedule is activated by the package. Run the builder as part of the
 weekly release preparation; publishing a future scheduled job requires a builder
 with the GPU runtime and its persistent cache.

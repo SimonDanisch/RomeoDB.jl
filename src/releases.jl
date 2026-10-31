@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Simon Danisch
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # Public index releases are immutable artifacts. Only the materialized index is
 # writable; its revision changes in the same transaction as its package records.
 

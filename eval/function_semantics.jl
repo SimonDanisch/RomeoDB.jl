@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Simon Danisch
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # Real-model pilot on public ecosystem implementations. This measures retrieval
 # in an explicitly bounded corpus, not recall over the whole registry.
 using RomeoDB

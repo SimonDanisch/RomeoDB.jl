@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Simon Danisch
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """
 A queryable index of the Julia ecosystem: every function, macro and type in the General
 registry, with its docstring, signature, size and a canonical form for finding clones
@@ -18,6 +21,7 @@ import SHA
 import SQLite
 import Tar
 import TOML
+import Pkg
 import Pkg.Artifacts
 import FileWatching.Pidfile
 import HNSW
@@ -34,6 +38,8 @@ include("semantic.jl")
 include("query.jl")
 include("function_semantics.jl")
 include("releases.jl")
+include("graph_releases.jl")
+include("embedding_runtime.jl")
 include("audit.jl")
 include("render.jl")
 include("mcp.jl")

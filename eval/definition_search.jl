@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Simon Danisch
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # How well definition search answers a need put in words, on a built index: for each
 # query, packages whose functions an expert would call. Run after changing the ranking:
 #

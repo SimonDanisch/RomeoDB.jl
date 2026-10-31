@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Simon Danisch
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # Ranking by meaning: one embedding per package, and the query's, compared by cosine.
 # RomeoDB does not compute embeddings itself; an embedder is any value with methods for
 # `embeddocument` and `embedquery` (the Qwen3EmbeddingRunner extension defines them for

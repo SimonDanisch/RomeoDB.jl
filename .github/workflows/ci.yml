@@ -13,3 +13,27 @@ jobs:
       - uses: julia-actions/cache@v2
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
+  lavapipe-embeddings:
+    name: Qwen embeddings / Lavapipe
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      JULIA_NUM_THREADS: '2'
+      JULIA_GLFW_PLATFORM: 'null'
+      OPENBLAS_NUM_THREADS: '1'
+      LP_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1.12'
+      - uses: julia-actions/cache@v2
+        with:
+          cache-name: lavapipe-embeddings
+      - name: Install optional embedding test software
+        run: >-
+          julia --project=test/lavapipe -e
+          'using Pkg; Pkg.develop(path=pwd()); Pkg.instantiate();
+          using RomeoDB; RomeoDB.install_embedding_runtime!()'
+      - name: Compare Vulkan embeddings with the fp32 reference
+        run: julia --project=test/lavapipe test/lavapipe/runtests.jl

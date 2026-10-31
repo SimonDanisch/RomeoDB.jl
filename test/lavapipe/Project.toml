@@ -1,0 +1,13 @@
+[deps]
+Lavapipe_jll = "89601188-ea2b-501d-a121-fa144db6cabf"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+RomeoDB = "b0bc34ab-3faa-4d3f-891a-2fccc1f41d4b"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[sources]
+RomeoDB = {path = "../.."}
+
+[compat]
+Lavapipe_jll = "26.2.2"
+julia = "1.12"

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Simon Danisch
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # Function bodies have their own embedding space. Package vectors are not used
 # as a substitute for function similarity.
 

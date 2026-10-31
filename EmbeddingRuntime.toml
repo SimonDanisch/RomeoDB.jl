@@ -1,0 +1,49 @@
+# Optional embedding software. Weights and tokenizer are owned by the runner's lazy artifacts.
+
+[sources.DNNKernels]
+url = "https://github.com/SimonDanisch/JuliaVision"
+rev = "ccbe8b2f0e0d3171e547a2aaa317728aee7e6500"
+subdir = "DNNKernels"
+
+[sources.Qwen3EmbeddingRunner]
+url = "https://github.com/SimonDanisch/JuliaVision"
+rev = "ccbe8b2f0e0d3171e547a2aaa317728aee7e6500"
+subdir = "Qwen3EmbeddingRunner"
+
+[sources.QwenImageRunner]
+url = "https://github.com/SimonDanisch/JuliaVision"
+rev = "ccbe8b2f0e0d3171e547a2aaa317728aee7e6500"
+subdir = "QwenImageRunner"
+
+[sources.KernelAbstractions]
+url = "https://github.com/SimonDanisch/KernelAbstractions.jl"
+rev = "79ac658d61638997a8cbd62520c7a5fb633709f8"
+
+[sources.KernelInterface]
+url = "https://github.com/SimonDanisch/KernelAbstractions.jl"
+rev = "79ac658d61638997a8cbd62520c7a5fb633709f8"
+subdir = "lib/KernelInterface"
+
+[sources.Lava]
+url = "https://github.com/SimonDanisch/Lava.jl"
+rev = "465806d32448b85e6153a689f84c199ba2a548a8"
+
+[sources.Mantle]
+url = "https://github.com/SimonDanisch/Mantle.jl"
+rev = "02b44f5ac13b219accfcc508ad38aa6a6460e5b2"
+
+[sources.Raycore]
+url = "https://github.com/JuliaGeometry/Raycore.jl"
+rev = "afe1079177a0407078ea2eaa1908655938216d97"
+
+[sources.GPUArrays]
+url = "https://github.com/SimonDanisch/GPUArrays.jl"
+rev = "61e30cea215e93202261d3f0b38df991f36c9081"
+
+[sources.Vulkan]
+url = "https://github.com/JuliaGPU/Vulkan.jl"
+rev = "8a45890fcffac22e1b0882ddf4898e0148fe9d85"
+
+[sources.VulkanCore]
+url = "https://github.com/JuliaGPU/VulkanCore.jl"
+rev = "4b4f72f2e15e0eb46b5c9262208146cfde47db38"

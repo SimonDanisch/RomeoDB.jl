@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Simon Danisch
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # These deterministic vectors test indexing/search/graph contracts. Real-model
 # retrieval quality is evaluated separately; this fixture is not that evidence.
 mutable struct FunctionFixtureEmbedder
@@ -48,6 +51,34 @@ end
             near = RomeoDB.semantic_neighbors(idx, index, loop.id; cross_packages = true, minsimilarity = 0.9)
             @test only(near).definition.package == "BroadcastGrid"
             @test only(near).similarity ≈ 1
+            loads = Ref(0)
+            lazy = RomeoDB.Server(idx; loader = () -> begin
+                loads[] += 1
+                () -> model
+            end)
+            for method in ("initialize", "tools/list", "ping")
+                message = RomeoDB.JSON3.read(RomeoDB.JSON3.write(Dict("jsonrpc" => "2.0", "id" => 1, "method" => method)))
+                @test haskey(RomeoDB.handle(lazy, message), "result")
+            end
+            @test loads[] == 0
+            RomeoDB.semantic!(lazy)
+            lazyworker = @atomic lazy.embedder
+            @test timedwait(() -> RomeoDB.ready(lazyworker), 10) === :ok
+            @test loads[] == 1
+            @test RomeoDB.functionsemantic!(lazy) !== nothing
+            @test loads[] == 1
+            close(lazyworker.requests)
+            wait(lazyworker.task)
+
+            # Discovery on an empty worker neither provisions the index nor
+            # starts the model, even with both enabled.
+            discovery = join([RomeoDB.JSON3.write(Dict("jsonrpc" => "2.0", "id" => i,
+                "method" => method)) for (i, method) in enumerate(("initialize", "tools/list", "ping"))], "\n") * "\n"
+            output = IOBuffer()
+            RomeoDB.serve(joinpath(root, "empty-server"); input = IOBuffer(discovery), output,
+                provision = true, embedder = () -> error("Discovery must not load a model"))
+            @test length(split(strip(String(take!(output))), '\n')) == 3
+            @test isempty(readdir(joinpath(root, "empty-server", "sources")))
             code = "function different_name(xx, yy)\n return [x for y in yy, x in xx], [y for y in yy, x in xx]\nend"
             matches = RomeoDB.semantic_similar(idx, index, model, code; purpose = "Coordinate matrices", minsimilarity = 0.9, exclude = ["LoopGrid"])
             @test only(only(matches).hits).definition.package == "BroadcastGrid"
@@ -81,6 +112,37 @@ end
             @test [(e.source,e.target,e.similarity) for e in loaded_graph.edges] == [(e.source,e.target,e.similarity) for e in graph.edges]
             clusters = RomeoDB.semantic_clusters(idx, approximate; graph, minsimilarity = 0.9)
             @test only(clusters).packages == ["BroadcastGrid", "LoopGrid"]
+
+            # A lazy graph artifact must also work when patching has assigned
+            # different SQLite ids on the receiving worker.
+            open(joinpath(root, "graph", "clusters.toml"), "w") do io
+                RomeoDB.TOML.print(io, Dict("groups" => [Dict(
+                    "representative" => c.representative.id, "members" => [h.id for h in c.members],
+                    "packages" => c.packages, "minimum_similarity" => c.minimum_similarity) for c in clusters]))
+            end
+            RomeoDB.releaseinfo!(idx, Dict("schema" => "1", "revision" => "graph1", "registry" => "fixture",
+                "model" => "none", "dimensions" => "0", "kind" => "base"))
+            staged = RomeoDB.stage_graph_release!(idx, joinpath(root, "graph"), joinpath(root, "graph-release"); revision = "graph1")
+            bindings = joinpath(root, "GraphArtifacts.toml")
+            archive = joinpath(root, "graph.tar.gz")
+            packed = RomeoDB.pack_graph_release!(staged, "ecosystem-graph1", archive, bindings; url = "file://" * archive)
+            @test RomeoDB.TOML.parsefile(bindings)["ecosystem-graph1"]["lazy"]
+            plan = joinpath(root, "GraphRelease.toml")
+            open(io -> RomeoDB.TOML.print(io, Dict("format" => 1, "target" => "graph1",
+                "graph" => Dict("revision" => "graph1", "artifact" => "ecosystem-graph1"))), plan, "w")
+            RomeoDB.exec!(idx.db, "UPDATE defs SET id=id+10000")
+            RomeoDB.exec!(idx.db, "UPDATE function_vectors SET definition=definition+10000")
+            withenv("JULIA_PKG_SERVER" => "") do
+                Pkg.Artifacts.with_artifacts_directory(joinpath(root, "graph-artifact-store")) do
+                    @test !Pkg.Artifacts.artifact_exists(packed.hash)
+                    resolved = RomeoDB.ecosystem_data(idx; plan, bindings)
+                    @test Pkg.Artifacts.artifact_exists(packed.hash)
+                    @test resolved.graph.ids == graph.ids .+ 10000
+                    @test only(resolved.groups)["members"] == [h.id + 10000 for h in only(clusters).members]
+                end
+            end
+            RomeoDB.exec!(idx.db, "UPDATE defs SET id=id-10000")
+            RomeoDB.exec!(idx.db, "UPDATE function_vectors SET definition=definition-10000")
 
             # A-B and B-C qualify, A-C does not. Complete-link clustering must
             # not turn the whole connected component into a duplicate group.

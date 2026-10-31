@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Simon Danisch
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # The canonical form of a definition, and what is computed from it.
 #
 # A definition becomes a pre-order token stream over its syntax tree: each inner node is

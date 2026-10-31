@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Simon Danisch
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # Qwen3-Embedding as RomeoDB's embedder: loaded when Qwen3EmbeddingRunner is.
 module RomeoDBQwen3EmbeddingExt
 

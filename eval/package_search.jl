@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Simon Danisch
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # How well package search answers task-level questions, on a built index: for each query,
 # packages an expert would name. Run after changing the ranking:
 #

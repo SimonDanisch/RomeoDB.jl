@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Simon Danisch
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # A Model Context Protocol server over stdio: JSON-RPC 2.0, one message per line. Each
 # tool is a type answering `toolname`, `description`, `schema` and `call`; a tool that
 # throws reports its error to the client as an `isError` result (with the backtrace on
@@ -117,8 +120,31 @@ mutable struct Server
     vectorsversion::Int
     functions::Union{Nothing,FunctionIndex}
     functionsversion::Int
+    provision::Bool
+    loader::Union{Nothing,Function}
 end
-Server(idx::Index, embedder::Union{Nothing,EmbedWorker} = nothing) = Server(idx, nothing, 0, embedder, nothing, 0, nothing, -1)
+Server(idx::Index, embedder::Union{Nothing,EmbedWorker} = nothing; provision::Bool = false, loader = nothing) =
+    Server(idx, nothing, 0, embedder, nothing, 0, nothing, -1, provision, loader)
+
+function provision!(s::Server)
+    s.provision || return nothing
+    ensure_index!(s.idx.dir)
+    s.provision = false
+    return nothing
+end
+
+function start_embedder!(s::Server)
+    factory = s.loader
+    factory === nothing && return nothing
+    s.loader = nothing
+    try
+        @atomic s.embedder = EmbedWorker(factory())
+    catch err
+        err isa InterruptException && rethrow()
+        @error "RomeoDB: the embedder did not load; searches stay lexical" exception = (err, catch_backtrace())
+    end
+    return nothing
+end
 
 # An `update!` in another process changes the database under a running server; SQLite
 # counts such commits in `data_version`, and the sketches are read again after one.
@@ -135,6 +161,7 @@ end
 
 """The semantic ranking the server can offer: none without an embedder, or before it has loaded."""
 function semantic!(s::Server)
+    start_embedder!(s)
     embedder = @atomic s.embedder
     (embedder === nothing || !ready(embedder)) && return nothing
     v = dataversion(s.idx)
@@ -146,6 +173,7 @@ function semantic!(s::Server)
 end
 
 function functionsemantic!(s::Server)
+    start_embedder!(s)
     embedder = @atomic s.embedder
     (embedder === nothing || !ready(embedder)) && return nothing
     v = dataversion(s.idx)
@@ -320,7 +348,11 @@ schema(::SimilarFunctionalityTool) = objschema(Dict(
     "limit" => intprop("Results per function", 10)), ["code"])
 function call(::SimilarFunctionalityTool, s::Server, a)
     semantic = functionsemantic!(s)
-    semantic === nothing && throw(ArgumentError("Function semantic search is unavailable: load an embedder and build function vectors for its model"))
+    if semantic === nothing
+        worker = @atomic s.embedder
+        worker !== nothing && !istaskdone(worker.task) && throw(ArgumentError("The embedding model is loading on first use; retry this tool after it is ready"))
+        throw(ArgumentError("Function semantic search is unavailable: load an embedder and build function vectors for its model"))
+    end
     limit = optional(a, :limit, 10)
     1 <= limit <= 50 || throw(ArgumentError("limit must be between 1 and 50"))
     groups = semantic_similar(s.idx, semantic.index, semantic.embedder, required(a, :code, String);
@@ -453,6 +485,7 @@ function handle(s::Server, msg)
         i === nothing && return replyerror(id, -32602, "unknown tool $name")
         args = get(params, :arguments, Dict())
         text, iserror = try
+            provision!(s)
             indexed = only(rows(s.idx, "SELECT EXISTS(SELECT 1 FROM packages WHERE status IN ('ok', 'local')) AS ready")).ready
             indexed == 1 || throw(ArgumentError(
                 "RomeoDB's code index has not been downloaded or built yet ($(s.idx.dir)). " *
@@ -475,31 +508,30 @@ end
 Run the MCP server on the index in `dir` until `input` ends. Logs go to stderr; only
 protocol messages are written to `output`.
 
-With `provision = true`, first install the index revision pinned by this package's
-release plan and apply missing artifact patches. Manually built indexes are retained.
+With `provision = true`, the first tool call installs the index revision pinned by
+this package's release plan and applies missing artifact patches. Initialization,
+tool discovery and importing the package do not download index data. Manually built
+indexes are retained.
 
-`embedder`, such as [`loadqwen3embedding`](@ref), runs on the main thread and returns
+`embedder`, such as [`loadqwen3embedding`](@ref), runs on the first semantic search,
+on the main thread, and returns
 the loader an [`EmbedWorker`](@ref) runs on a thread of its own; searches rank by
-meaning too once that has finished. Requests are answered meanwhile: the loop runs on a
-thread of its own, which leaves the main thread to package loading, whose initializers
-may insist on it (GLFW's, under Mantle). An embedder that fails to load is logged and
+meaning too once that has finished. The protocol loop stays on the main thread for
+package loading, whose initializers may insist on it (GLFW's, under Mantle).
+Model construction and inference stay on the embedding worker's thread.
+An embedder that fails to load is logged and
 the server stays lexical.
 """
 function serve(dir::AbstractString; input::IO = stdin, output::IO = stdout, embedder = nothing,
                provision::Bool = false)
-    provision && ensure_index!(dir)
-    s = Server(Index(dir))
-    loop = Threads.@spawn serveloop(s, input, output)
-    if embedder !== nothing
-        loader = try
-            embedder()
-        catch e
-            @error "RomeoDB: the embedder did not load; searches stay lexical" exception = (e, catch_backtrace())
-            nothing
-        end
-        loader === nothing || (@atomic s.embedder = EmbedWorker(loader))
+    s = Server(Index(dir); provision, loader = embedder)
+    try
+        serveloop(s, input, output)
+    finally
+        worker = @atomic s.embedder
+        worker === nothing || close(worker.requests)
+        DBInterface.close!(s.idx.db)
     end
-    wait(loop)
     return
 end
 

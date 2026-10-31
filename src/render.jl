@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Simon Danisch
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # Results as text for a reader that is usually a language model: one block per hit, the
 # location first, then the signature, then the docstring's first informative line.
 

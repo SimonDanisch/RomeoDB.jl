@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Simon Danisch
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # Definitions read off a package's source with JuliaSyntax. Nothing here runs package
 # code: the walk starts at `src/<Name>.jl` (and each extension's entry file), follows
 # `include`s with a literal path so every definition gets the module it is evaluated in,
