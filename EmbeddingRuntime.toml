@@ -32,6 +32,10 @@ rev = "465806d32448b85e6153a689f84c199ba2a548a8"
 url = "https://github.com/SimonDanisch/Mantle.jl"
 rev = "02b44f5ac13b219accfcc508ad38aa6a6460e5b2"
 
+[sources.Metal]
+url = "https://github.com/SimonDanisch/Metal.jl"
+rev = "f0280e981718c2539f4ee2f2d452f2eedf401cb2"
+
 [sources.Raycore]
 url = "https://github.com/JuliaGeometry/Raycore.jl"
 rev = "afe1079177a0407078ea2eaa1908655938216d97"
