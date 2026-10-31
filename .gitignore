@@ -1,0 +1,8 @@
+Manifest.toml
+.bonitoAgents/
+data/
+gen/
+releases/
+*.jl.cov
+*.jl.*.cov
+*.jl.mem
