@@ -2,17 +2,17 @@
 
 [sources.DNNKernels]
 url = "https://github.com/SimonDanisch/JuliaVision"
-rev = "ccbe8b2f0e0d3171e547a2aaa317728aee7e6500"
+rev = "2bc942d1e6d15773869021a5bb5857d8a75d9192"
 subdir = "DNNKernels"
 
 [sources.Qwen3EmbeddingRunner]
 url = "https://github.com/SimonDanisch/JuliaVision"
-rev = "ccbe8b2f0e0d3171e547a2aaa317728aee7e6500"
+rev = "2bc942d1e6d15773869021a5bb5857d8a75d9192"
 subdir = "Qwen3EmbeddingRunner"
 
 [sources.QwenImageRunner]
 url = "https://github.com/SimonDanisch/JuliaVision"
-rev = "ccbe8b2f0e0d3171e547a2aaa317728aee7e6500"
+rev = "2bc942d1e6d15773869021a5bb5857d8a75d9192"
 subdir = "QwenImageRunner"
 
 [sources.KernelAbstractions]

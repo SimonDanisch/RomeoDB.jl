@@ -11,6 +11,7 @@ ENV["JULIA_GLFW_PLATFORM"] = "null"
 
 using Test, LinearAlgebra, Pkg, RomeoDB
 using Qwen3EmbeddingRunner
+using QwenImageRunner
 using Qwen3EmbeddingRunner: Mantle, DNNKernels, JSON3
 
 @testset "Qwen embeddings on Lavapipe_jll" begin
@@ -20,6 +21,13 @@ using Qwen3EmbeddingRunner: Mantle, DNNKernels, JSON3
     device = only(devices)
     @test device.kind == :cpu
     @test occursin("llvmpipe", lowercase(device.name * " " * device.driver))
+
+    # Installing the embedding software must not pull unrelated vision/audio
+    # fixtures from the shared kernel package.
+    for package in (DNNKernels, Qwen3EmbeddingRunner, QwenImageRunner)
+        artifacts = RomeoDB.TOML.parsefile(joinpath(pkgdir(package), "Artifacts.toml"))
+        @test all(binding -> get(binding, "lazy", false), values(artifacts))
+    end
 
     # Neither querying the model nor downloading its reference should provision
     # the full ecosystem database or graph.
